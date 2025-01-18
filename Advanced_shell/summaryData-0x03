@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+JSON_DIR="."
+REPORT_FILE="pokemon_report.csv"
+
+echo "Name,Height (m),Weight (kg)" > "$REPORT_FILE"
+
+TOTAL_HEIGHT=0
+TOTAL_WEIGHT=0
+POKEMON_COUNT=0
+
+for JSON_FILE in "$JSON_DIR"/*.json; do
+    [ -e "$JSON_FILE" ] || continue
+
+    NAME=$(jq -r '.name' "$JSON_FILE")
+    HEIGHT=$(jq -r '.height' "$JSON_FILE")
+    WEIGHT=$(jq -r '.weight' "$JSON_FILE")
+
+    HEIGHT_METERS=$(awk "BEGIN {print $HEIGHT / 10}")
+    WEIGHT_KG=$(awk "BEGIN {print $WEIGHT / 10}")
+
+    echo "$NAME,$HEIGHT_METERS,$WEIGHT_KG" >> "$REPORT_FILE"
+
+    TOTAL_HEIGHT=$(awk "BEGIN {print $TOTAL_HEIGHT + $HEIGHT_METERS}")
+    TOTAL_WEIGHT=$(awk "BEGIN {print $TOTAL_WEIGHT + $WEIGHT_KG}")
+    POKEMON_COUNT=$((POKEMON_COUNT + 1))
+done
+
+if [ "$POKEMON_COUNT" -gt 0 ]; then
+    AVG_HEIGHT=$(awk "BEGIN {print $TOTAL_HEIGHT / $POKEMON_COUNT}")
+    AVG_WEIGHT=$(awk "BEGIN {print $TOTAL_WEIGHT / $POKEMON_COUNT}")
+
+    echo -e "\nSummary:"
+    echo "Total Pokémon: $POKEMON_COUNT"
+    echo "Average Height: ${AVG_HEIGHT}m"
+    echo "Average Weight: ${AVG_WEIGHT}kg"
+else
+    echo "No Pokémon data found in JSON files."
+fi
