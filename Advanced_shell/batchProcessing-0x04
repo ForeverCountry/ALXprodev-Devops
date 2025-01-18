@@ -31,6 +31,15 @@ for POKEMON in "${POKEMON_LIST[@]}"; do
     fetch_pokemon "$POKEMON" &
 done
 
-wait
+echo "Monitoring background jobs..."
+while jobs %%; do
+    sleep 1
+done
+
+JOBS_RUNNING=$(jobs -p)
+if [ -n "$JOBS_RUNNING" ]; then
+    echo "Terminating unfinished jobs..."
+    kill $JOBS_RUNNING
+fi
 
 echo "Data retrieval complete. Check $ERROR_LOG for any errors."
