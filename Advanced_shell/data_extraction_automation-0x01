@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+INPUT_FILE="data.json"
+
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: JSON file ($INPUT_FILE) not found!"
+    exit 1
+fi
+
+POKEMON_NAME=$(jq -r '.name' "$INPUT_FILE")
+HEIGHT=$(jq -r '.height' "$INPUT_FILE")
+WEIGHT=$(jq -r '.weight' "$INPUT_FILE")
+TYPE=$(jq -r '.types[0].type.name' "$INPUT_FILE")
+
+# Convert height and weight to human-readable format (awk for processing, sed for formatting)
+HEIGHT_METERS=$(echo "$HEIGHT" | awk '{print $1 / 10}' | sed 's/$/m/') # Convert decimeters to meters
+WEIGHT_KG=$(echo "$WEIGHT" | awk '{print $1 / 10}' | sed 's/$/kg/')   # Convert hectograms to kilograms
+
+# Format the final output
+FINAL_OUTPUT="$POKEMON_NAME is of type $TYPE, weighs $WEIGHT_KG, and is $HEIGHT_METERS tall."
+
+# Display the output
+echo "$FINAL_OUTPUT"
